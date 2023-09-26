@@ -1,0 +1,21 @@
+16
+max	push 0
+_	pop r0
+_	pop r1
+_	rdmem r1 r2
+tst	cmp r2 0
+_	jeq fin
+blp	rdmem r1 r3
+_	cmp r0 r3
+_	jse elp
+_	push r3
+_	pop r0
+elp	inc r1
+_	dec r2
+_	jmp tst
+fin	ret r0
+_       push m17
+3
+_	0
+_	0
+_	3
