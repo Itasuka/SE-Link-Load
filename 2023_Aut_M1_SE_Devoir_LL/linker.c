@@ -12,18 +12,20 @@ module linker(int nbmods, module *mods) {
 
     // passe 1, créer un module unique pour les regrouper tous en décalant les adresses relatives dans chaque module
 
-    int code_length = 0;
-    int data_size = 0;
+    int* code_length = malloc((nbmods)*sizeof(int));
+    int* data_size = malloc((nbmods)*sizeof(int));
     casemem *code;
     casemem *data;
 
-    for (int i = 0; i < nbmods; ++i) {
-        code_length += mods[i].code_length;
-        data_size += mods[i].data_size;
+    code_length[0] = mods[0].code_length;
+    data_size[0] = mods[0].data_size;
+    for (int i = 1; i < (nbmods); ++i) {
+        code_length[i] = mods[i].code_length + code_length[i-1];
+        data_size[i] = mods[i].data_size + data_size[i-1];
     }
 
-    code = malloc(code_length * sizeof(casemem));
-    data = malloc(data_size * sizeof(casemem));
+    code = malloc(code_length[(nbmods-1)] * sizeof(casemem));
+    data = malloc(data_size[(nbmods-1)] * sizeof(casemem));
 
     int decalage_code = 0;
     int decalage_data = 0;
@@ -38,12 +40,27 @@ module linker(int nbmods, module *mods) {
         decalage_data += mods[i].data_size;
     }
 
-    mod = module_create(code_length, code, data_size, data);
+    mod = module_create(code_length[nbmods-1], code, data_size[nbmods-1], data);
 
     for (int i = 0; i < mod.code_length; ++i){
         for (int j = 0; j < mod.code[i].nbarg; ++j){
             if (mod.code[i].args[j].type == 4){
-                //TODO
+                int c = 0;
+                int d = 0;
+                for(int k = 0; k < nbmods; ++k) {
+                    if (i < code_length[k]) {
+                        c = code_length[k-1];
+                        d = data_size[k-1];
+                        printf("%d\n", k);
+                        printf("%d\n", d);
+                        if((i + mod.code[i].args[j].val.n) < code_length[k])
+                            mod.code[i].args[j].val.n += c;
+                        else
+                            mod.code[i].args[j].val.n =
+                                    code_length[nbmods-1] + d;//arrivee dans data ajout decalage
+                        break;
+                    }
+                }
             }
             if (mod.code[i].args[j].type == 3){
                 //TODO
@@ -51,6 +68,8 @@ module linker(int nbmods, module *mods) {
         }
     }
 
+    free(code_length);
+    free(data_size);
     // passe 2, remplir la table des symboles
 
 
