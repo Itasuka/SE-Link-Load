@@ -77,5 +77,17 @@ module linker(int nbmods, module *mods) {
 
     // passe 3, remplacer pour chaque référence le nom par l'adresse de la définition
 
-    return mod;
+    for (int i = 0; i < mod.code_length; ++i) {
+        for (int j = 0; j < mod.code[i].nbarg; ++j) {
+            if (mod.code[i].args[j].type == 3) {
+                mod.code[i].args[j].type = 4;
+                mod.code[i].args[j].val.n = chercherTable(t, mod.code[i].args[j].val.name);
+            }
+        }
+    }
+
+    libererTable(t);
+
+    return
+            mod;
 }

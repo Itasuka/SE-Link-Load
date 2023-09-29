@@ -52,3 +52,5 @@ tgz : $(TGZ_NAME).tgz
 $(TGZ_NAME).tgz : $(FICHIERS_A_RENDRE)
 	tar czf $(TGZ_NAME).tgz $(FICHIERS_A_RENDRE)
 
+clean :
+	rm -f %.o main
