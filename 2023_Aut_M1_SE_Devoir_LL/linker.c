@@ -41,7 +41,7 @@ int chercherTable(struct table *t, char const *s) {
     }
     struct table *tmpT = t;
     while (tmpT != NULL) {
-        if (strcmp(tmpT->symbol,s) == 0){
+        if (strcmp(tmpT->symbol, s) == 0) {
             return tmpT->n;
         }
         tmpT = tmpT->next;
@@ -51,6 +51,8 @@ int chercherTable(struct table *t, char const *s) {
 }
 
 void affichageTable(struct table *t) {
+    printf("           ################ Table des symboles ################\n");
+    printf("      -----------------------------------------------------------------------------\n");
     char *res = "           %s  =>    %d\n";
     if ((t->n / 10) < 1)
         res = "           %s  =>     %d\n";
@@ -64,6 +66,7 @@ void affichageTable(struct table *t) {
 
         printf(res, t->symbol, t->n);
     }
+    printf("      -----------------------------------------------------------------------------\n");
 }
 
 void libererTable(struct table *t) {
@@ -152,12 +155,10 @@ module linker(int nbmods, module *mods) {
         }
     }
 
-    printf("           ################ Table des symboles ################\n");
-    printf("      -----------------------------------------------------------------------------\n");
-    affichageTable(t);
-    printf("      -----------------------------------------------------------------------------\n");
+
 
     // afficher la table des symboles
+    affichageTable(t);
 
     // passe 3, remplacer pour chaque référence le nom par l'adresse de la définition
 
@@ -172,6 +173,5 @@ module linker(int nbmods, module *mods) {
 
     libererTable(t);
 
-    return
-            mod;
+    return mod;
 }
