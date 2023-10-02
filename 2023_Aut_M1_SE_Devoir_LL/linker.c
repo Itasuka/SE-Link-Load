@@ -5,6 +5,73 @@
 #include "linker.h"
 #include "utils.h"
 
+struct table {
+    char const *symbol;
+    int n;
+    struct table *next;
+};
+
+struct table *initTable(char const *s, int n) {
+    struct table *t = malloc(sizeof(struct table));
+    t->symbol = s;
+    t->n = n;
+    t->next = NULL;
+    return t;
+}
+
+struct table *ajoutTable(struct table *t, char const *s, int n) {
+    if (t == NULL) {
+        t = initTable(s, n);
+        return t;
+    }
+    struct table *tmpT = t;
+    while (tmpT->next != NULL)
+        tmpT = tmpT->next;
+    tmpT->next = malloc(sizeof(struct table));
+    tmpT = tmpT->next;
+    tmpT->symbol = s;
+    tmpT->n = n;
+    tmpT->next = NULL;
+    return t;
+}
+
+int chercherTable(struct table *t, char const *s) {
+    if (t == NULL) {
+        return -1;
+    }
+    struct table *tmpT = t;
+    while (tmpT != NULL) {
+        if (strcmp(tmpT->symbol,s) == 0){
+            return tmpT->n;
+        }
+        tmpT = tmpT->next;
+    }
+
+    return -1;
+}
+
+void affichageTable(struct table *t) {
+    char *res = "           %s  =>    %d\n";
+    if ((t->n / 10) < 1)
+        res = "           %s  =>     %d\n";
+    printf(res, t->symbol, t->n);
+    while (t->next != NULL) {
+        t = t->next;
+        if ((t->n / 10) < 1)
+            res = "           %s  =>     %d\n";
+        else
+            res = "           %s  =>    %d\n";
+
+        printf(res, t->symbol, t->n);
+    }
+}
+
+void libererTable(struct table *t) {
+    if (t->next != NULL) {
+        libererTable(t->next);
+    }
+    free(t);
+}
 
 module linker(int nbmods, module *mods) {
 
@@ -70,8 +137,25 @@ module linker(int nbmods, module *mods) {
 
     free(code_length);
     free(data_size);
-    // passe 2, remplir la table des symboles
 
+
+    // passe 2, remplir la table des symboles
+    struct table *t = NULL;
+    for (int i = 0; i < mod.code_length; ++i) {
+        if (strcmp(mod.code[i].symbol, "_") != 0) {
+            t = ajoutTable(t, mod.code[i].symbol, i);
+        }
+    }
+    for (int i = 0; i < mod.data_size; ++i) {
+        if (strcmp(mod.data[i].symbol, "_") != 0) {
+            t = ajoutTable(t, mod.data[i].symbol, mod.code_length + i);
+        }
+    }
+
+    printf("           ################ Table des symboles ################\n");
+    printf("      -----------------------------------------------------------------------------\n");
+    affichageTable(t);
+    printf("      -----------------------------------------------------------------------------\n");
 
     // afficher la table des symboles
 
